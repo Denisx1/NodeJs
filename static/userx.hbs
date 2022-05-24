@@ -1,12 +1,9 @@
-<body>
-    <header class='navbar'>
-        <div class="CarList"style="background-color: aqua; color: black; font-size: 40px;text-align:center; padding-left: 20px;display: flex; flex-direction:row; justify-content: start; align-items:center;">
-        List of users   
-            <button style="width:120px; height:30px;background-color:cornflowerblue; border:none; margin-left:20px" >
-                <a href="http://localhost:5000/users">Users</a>
-            </button>
-        </div>
+<div style="background-color: chartreuse;">
+   Our users
+   <ol>
+      {{#each users}}
+      <li>{{this.name}}</li>
+      {{/each}}
+   </ol>
 
-    </header>
-    
-</body>
+</div>
