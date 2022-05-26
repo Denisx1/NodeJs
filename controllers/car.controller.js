@@ -1,44 +1,48 @@
-const cars = require("../database/cars")
+const Cars = require("../database/Cars.model")
 
 module.exports = {
-    getAllCars: (req,res )  => {
+    getAllCars: async(req,res )  => {
+        const cars = await Cars.find()
         res.json(cars)
     },
 
-    createCars:(req,res) => {
-        console.log(req.body)
-        cars.push(req.body)
-        res.json(cars)
+    createCars:async(req,res) => {
+        try{
+            const createCar =  await Cars.create(req.body)
+            res.status(201).json(createCar)
+        }catch(e){
+            res.json(e)
+        }
     },
 
-    CarId:(req , res)=>{
+    CarId:async(req , res)=>{
         const {carIndex} = req.params
-        const car = cars[carIndex]
+        const car = await Cars.findById(carIndex)
 
         if(!car){
             res.status(404).json(`Car with (${carIndex}) id  not found`)
             return
         }
 
-        res.json(car)
+        res.json(createCar)
     },
 
-    deleteCar:(req, res)=>{
+    deleteCar:async(req, res)=>{
         const {carIndex} = req.params
-        const car = cars[carIndex]
+        const car = await Cars.deleteOne(carIndex)
 
         if(!car){
             res.status(404).json(`Car with (${carIndex}) id  not found`)
             return
         }
-        cars.splice(carIndex, 1)
+        Cars.splice(carIndex, 1)
         res.json(car)
     },
 
-    updateCar:(req, res)=>{
+    updateCar: async (req, res)=>{
         const {carIndex} = req.params
-        const car = cars[carIndex]
-        Object.assign(cars[carIndex], req.body)
+        const car = await Cars.updateOne(carIndex)
+        Object.assign(Cars[carIndex], req.body)
         
         if(!car){
             res.status(404).json(`Car with (${carIndex}) id  not found`)

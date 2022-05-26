@@ -1,44 +1,48 @@
-const userss = require("../database/userss")
+const User = require("../database/User.model")
 
 module.exports = {
-    getAllUsers: (req,res )  => {
-        res.json(userss)
+    getAllUsers: async(req,res )  => {
+        const users =  await User.find();
+        res.json(users)
     },
 
-    createUser:(req,res) => {
-        console.log(req.body)
-        userss.push(req.body)
-        res.json(userss)
+    createUser: async (req,res) => {
+        try{
+            const createdUser = await User.create(req.body)
+            res.status(201).json(createdUser)
+        }catch(e){
+            res.json(e)
+        }
     },
 
-    userId:(req , res)=>{
+    userId: async (req , res)=>{
         const {userIndex} = req.params
-        const user = userss[userIndex]
+        const user = await User.findById(userIndex)
 
         if(!user){
             res.status(404).json(`User with (${userIndex}) id  not found`)
             return
         }
 
-        res.json(user)
+        res.json(createUser)
     },
 
-    deleteUser:(req, res)=>{
+    deleteUser: async (req, res)=>{
         const {userIndex} = req.params
-        const user = userss[userIndex]
+        const user = await User.findById(userIndex)
 
         if(!user){
             res.status(404).json(`User with (${userIndex}) id  not found`)
             return
         }
-        userss.splice(userIndex, 1)
+        User.splice(userIndex, 1)
         res.json(user)
     },
 
-    updateUser:(req, res)=>{
+    updateUser:async(req, res)=>{
         const {userIndex} = req.params
-        const user = userss[userIndex]
-        Object.assign(userss[userIndex], req.body)
+        const user = await User.updateOne(userIndex)
+        Object.assign(User(userIndex), req.body)
         
         if(!user){
             res.status(404).json(`User with (${userIndex}) id  not found`)
