@@ -6,15 +6,15 @@ const userMidllewares = require('../midllewares/user.middleware')
 
 const userRouter = Router()
 
-userRouter.get('', userController.getAllUsers)
+userRouter.get('/', userController.getAllUsers)
+userRouter.post('/',userMidllewares.checkGender, userMidllewares.checkAge, userMidllewares.checkIsEmailDublicate, userController.createUser)
 
-userRouter.post('',userMidllewares.checkGender, userMidllewares.checkAge, userMidllewares.checkIsEmailDublicate, userController.createUser)
+userRouter.get('/:userIndex',userController.userId)
+userRouter.delete('/:userIndex',userController.deleteUser)
+userRouter.put('/:userIndex',userController.updateUser)
+userRouter.all('/:userIndex',userMidllewares.checkIdUserPresent)
 
-userRouter.get('/:userIndex',userMidllewares.checkUser,userController.userId)
 
-userRouter.get('/:userIndex',userController.deleteUser)
-
-userRouter.get('/:userIndex',userController.updateUser)
 
 
 module.exports = userRouter

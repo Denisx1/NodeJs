@@ -1,53 +1,71 @@
 const Cars = require("../database/Cars.model")
+const ApiError = require('../errors/Appierror')
 
 module.exports = {
-    getAllCars: async(req,res )  => {
-        const cars = await Cars.find()
-        res.json(cars)
-    },
-
-    createCars:async(req,res) => {
+    getAllCars: async(req,res, next)  => {
         try{
-            const createCar =  await Cars.create(req.body)
-            res.status(201).json(createCar)
+            const {limit = 20, page = 1} = req.query
+            const skip = (page-1)*limit
+
+            const cars =  await Cars.find().limit(limit).skip(skip);
+            const count = await Cars.count({})
+            
+            res.json({
+                page,
+                parPage: limit,
+                data: cars,
+                count
+            })
         }catch(e){
-            res.json(e)
+            next(e)
         }
     },
 
-    CarId:async(req , res)=>{
-        const {carIndex} = req.params
-        const car = await Cars.findById(carIndex)
-
-        if(!car){
-            res.status(404).json(`Car with (${carIndex}) id  not found`)
-            return
+    createCar: async (req,res, next) => {
+        try{
+            const createdCar = await Cars.create(req.body)
+            next(new ApiError(`User with (${carIndex}) id  not found`, 404))
+        }catch(e){
+            next(e)
         }
-
-        res.json(createCar)
     },
 
-    deleteCar:async(req, res)=>{
-        const {carIndex} = req.params
-        const car = await Cars.deleteOne(carIndex)
+    carId: async (req , res, next)=>{
+        try{
+            const {carIndex} = req.params
+            const car = await Cars.findById(carIndex)
 
         if(!car){
-            res.status(404).json(`Car with (${carIndex}) id  not found`)
+            next(new ApiError(`User with (${carIndex}) id  not found`, 404))
             return
         }
-        Cars.splice(carIndex, 1)
+
         res.json(car)
+    }catch(e){
+        next(e)
+    }
+},
+
+    deleteCar: async (req, res, next)=>{
+        try{
+            const {carIndex} = req.params
+            const carDelete = await Cars.deleteOne({_id: carIndex})
+            res.json(carDelete)
+        }catch(e){
+            next(e)
+        }
     },
 
-    updateCar: async (req, res)=>{
-        const {carIndex} = req.params
-        const car = await Cars.updateOne(carIndex)
-        Object.assign(Cars[carIndex], req.body)
-        
-        if(!car){
-            res.status(404).json(`Car with (${carIndex}) id  not found`)
-            return
+    updateCar:async(req, res, next)=>{
+        try{
+            const {carIndex} = req.params
+            const carUpdate = await User.updateOne(
+            { _id: carIndex },
+            { $set: req.body })
+
+            res.json(carUpdate)
+        }catch(e){
+            next(e)
         }
-        res.json(car)
-    }    
-}
+    } 
+}      

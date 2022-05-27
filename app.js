@@ -1,11 +1,15 @@
 const express = require('express')
 const {engine} = require('express-handlebars')
-const{PORT} = require('./config/config')
+const{ PORT, MONGO_URL } = require('./config/config')
 const mongoose = require('mongoose')
+const dotenv = require('dotenv')
+
+dotenv.config()
 
 const userRouter = require('./routers/user.router')
 const reportRouter = require('./routers/report.router')
 const carsRouter = require('./routers/cars.routes')
+const ApiError = require('./errors/Appierror')
 
 const app = express()
 
@@ -22,9 +26,22 @@ app.use(express.urlencoded({extended:true}))
 app.use('/users', userRouter)
 app.use('/reports', reportRouter)
 app.use('/cars', carsRouter)
+app.use('*',_notFoundHandler)
+app.use(_mainErrorHendler)
 
+function _notFoundHandler(req, res, next){
+    next(new ApiError('not found', 404))
+}
+
+function _mainErrorHendler(err, req, res, next){
+    res.status(err.status || 500).json({
+        message: err.message || 'Server Error ',
+        status:err.status,
+        data:[]
+    })
+}
   
-mongoose.connect("mongodb://localhost:27017/hebron_rocket").then(()=>{
+mongoose.connect(MONGO_URL).then(()=>{
     console.log('Welcome Database')
 });
 

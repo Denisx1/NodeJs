@@ -1,4 +1,5 @@
 const USer = require('../database/User.model')
+const ApiError = require('../errors/Appierror')
 
 const checkIsEmailDublicate = async(req, res, next)=>{
     try{
@@ -11,7 +12,7 @@ const checkIsEmailDublicate = async(req, res, next)=>{
         const isUserPresent = await USer.findOne({ email: email.toLowerCase().trim() })
 
         if (isUserPresent){
-            throw new Error('User with this email already present', 409)  
+            throw new ApiError('User with this email it`s ok')  
         }
 
         next()    
@@ -22,10 +23,10 @@ const checkIsEmailDublicate = async(req, res, next)=>{
 
 const checkUser = async(req,res,next)=>{
     try{
-        const {userIndex} = req.params
+        const {userIndex} = req.body
         const userIsPresent = await USer.findById(userIndex)
         if(!userIsPresent){
-            next(new Error(`User with ${userIndex} is absent`))
+            next(new ApiError(`User with ${userIndex} is absent`, 409))
             return
         }
         next()
@@ -38,7 +39,7 @@ const checkAge = async(req, res, next)=>{
     try{
         const {age} = req.body
         if(age<18){
-            next(new Error('YOU ARE NOT AN ADULT'))
+            next(new ApiError ('YOU ARE NOT AN ADULT'))
             return
         }
         next()
@@ -53,16 +54,28 @@ const checkGender = async (req, res, next)=>{
         const Genders = ['famale', 'male', 'another']
 
         if(!Genders.includes(gender)){
-            res.status(404).json({
-                message: `No gender ${gender}`
-            })
+            next(new ApiError(`No gender ${gender}`))
             return
         }
         next()
     }catch(e){
-        res.status(400).json({
-            message: e.message
-        })
+        next(e)
+    }
+}
+
+const checkIdUserPresent = async(req, res, next)=>{
+    try{
+        const { userIndex } = req.params
+
+        const userById = await USer.findById(userIndex)
+
+        if(!userById){
+            next(new ApiError('User not found', 404))
+            return
+        }
+        next
+    }catch(e){
+        next(e)
     }
 }
 
@@ -70,5 +83,6 @@ module.exports = {
     checkIsEmailDublicate,
     checkUser,
     checkAge,
-    checkGender
+    checkGender,
+    checkIdUserPresent
 }
