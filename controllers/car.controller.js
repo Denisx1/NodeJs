@@ -1,5 +1,5 @@
 const Cars = require("../database/Cars.model")
-const ApiError = require('../errors/Appierror')
+
 
 module.exports = {
     getAllCars: async(req,res, next)  => {
@@ -24,7 +24,7 @@ module.exports = {
     createCar: async (req,res, next) => {
         try{
             const createdCar = await Cars.create(req.body)
-            next(new ApiError(`User with (${carIndex}) id  not found`, 404))
+            res.json(createdCar)
         }catch(e){
             next(e)
         }
@@ -34,11 +34,6 @@ module.exports = {
         try{
             const {carIndex} = req.params
             const car = await Cars.findById(carIndex)
-
-        if(!car){
-            next(new ApiError(`User with (${carIndex}) id  not found`, 404))
-            return
-        }
 
         res.json(car)
     }catch(e){

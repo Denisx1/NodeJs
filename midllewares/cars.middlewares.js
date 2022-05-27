@@ -1,5 +1,7 @@
-const CArs = require('../database/Cars.model')
-const ApiError = require('../errors/Appierror')
+const {CArs} = require('../database')
+const {AppiError} = require('../errors')
+const { CURRENT_YEAR } = require('../constants')
+const { carValidator, carUpdateValidator} = require('../validators')
 
 const checkDublickateNumber = async(req,res,next)=>{
 
@@ -7,13 +9,7 @@ const checkDublickateNumber = async(req,res,next)=>{
         const { number =  '' } = req.body
 
         if(!number){
-            throw(new ApiError(`Number is required`, 400))
-        }
-
-        const carPresent = await CArs.findOne({number: number.toLowerCase().trim()})
-
-        if(carPresent){
-            throw(new ApiError(`There is already such a number`, 409))
+            throw(new AppiError(`Number is required`, 400))
         }
         next()
     }catch(e){
@@ -27,7 +23,7 @@ const carIsOnTheList = async (req, res, next)=>{
         const presentCar = await CArs.findById(carIndex)
 
         if(presentCar){
-            next(new ApiError(`Car with ${carIndex} is absent`),404)
+            next(new AppiError(`Car with ${carIndex} is absent`),404)
             return
         }
         next()
@@ -39,8 +35,8 @@ const carIsOnTheList = async (req, res, next)=>{
 const checkAgeThisCar = async (req,res,next)=>{
     try{
         const {age} = req.body
-        if(age<=1970){
-            next(new ApiError(`You car is old and non-repairable because it old`))
+        if(age<=(CURRENT_YEAR-50) || age>CURRENT_YEAR){
+            next(new AppiError(`You car is old and non-repairable because it old`))
         }
         next()
     }catch(e){
@@ -48,9 +44,42 @@ const checkAgeThisCar = async (req,res,next)=>{
     }
 }
 
+const newCarValidator = (req, res, next)=>{
+    try{
+        const {error, value} = carValidator.userCarSubSchema.validate(req.body)
+
+        if(error){
+            next(new AppiError(error.details[0].message, 400))
+            return
+        }
+        req.body = value
+
+        next()
+    }catch(e){
+        next(e)
+    }
+}
+
+const updateCar = (req, res, next)=>{
+    try{
+        const {error, value} = carUpdateValidator.carUpdateShemeValidator.validate(req.body)
+
+        if(error) {
+            next(new AppiError(error.details[0].message, 400))
+            return
+        }
+        req.body = Object.assign(req.body, value)
+        next()
+    }catch(e){
+        next(e)
+    }
+}
+
+
 module.exports = {
     checkDublickateNumber,
     carIsOnTheList,
     checkAgeThisCar,
-
+    newCarValidator,
+    updateCar
 }

@@ -6,9 +6,7 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
-const userRouter = require('./routers/user.router')
-const reportRouter = require('./routers/report.router')
-const carsRouter = require('./routers/cars.routes')
+const{ userRouter, carsRouter, reportRouter } = require('./routers')
 const ApiError = require('./errors/Appierror')
 
 const app = express()

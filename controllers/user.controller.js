@@ -1,5 +1,7 @@
 const User = require("../database/User.model")
 const ApiError = require('../errors/Appierror')
+const { authService } = require('../services')
+
 
 module.exports = {
     getAllUsers: async(req,res, next)  => {
@@ -23,8 +25,14 @@ module.exports = {
 
     createUser: async (req,res, next) => {
         try{
-            const createdUser = await User.create(req.body)
-            next(new ApiError(`User with (${userIndex}) id  not found`, 404))
+            const hashPassword = await authService.hashPassword(req.body.password)
+
+            console.log(req.body.password)
+            console.log(hashPassword)
+
+            const createdUser = await User.create({...req.body, password: hashPassword})
+    
+            res.json(createdUser)
         }catch(e){
             next(e)
         }

@@ -1,5 +1,7 @@
-const USer = require('../database/User.model')
-const ApiError = require('../errors/Appierror')
+const { USer } = require('../database')
+const { ApiError } = require('../errors')
+const { CURRENT_YEAR } = require('../constants')
+const { userValidator,userUpdateVAlidators,queryValidators } = require('../validators')
 
 const checkIsEmailDublicate = async(req, res, next)=>{
     try{
@@ -79,10 +81,62 @@ const checkIdUserPresent = async(req, res, next)=>{
     }
 }
 
+const newUserValidator = (req, res, next)=>{
+    try{
+        const { error, value } = userValidator.newUserJoiSchema.validate(req.body)
+
+        console.log(value)
+
+        if(error){
+            next( new ApiError(error.details[0].message, 400))
+            return
+        }
+
+        req.body = value
+
+        next()
+    }catch(e){
+        next(e)
+    }
+}    
+
+const updateUserValidation = (req, res, next) =>{
+    try{
+        const { error, value} = userUpdateVAlidators.UpdateSheme.validate(req.body)
+        
+        if (error){
+            next(new ApiError(error.details[0],400))
+            return
+        }
+        req.body = Object.assign(req.body, value)
+
+        next()
+    }catch(e){
+        next(e)
+    }
+}
+
+const validateUserQuery = (req, res, next) =>{
+    try{
+        const { error } = queryValidators.querySchemaValidator.validate(req.query)
+
+        if(error) {
+            next(new ApiError(error.details[0],400))
+            return
+        }
+        next()
+    }catch(e){
+        next(e)
+    }
+}
+
 module.exports = {
     checkIsEmailDublicate,
     checkUser,
     checkAge,
     checkGender,
-    checkIdUserPresent
+    checkIdUserPresent,
+    newUserValidator,
+    updateUserValidation,
+    validateUserQuery
 }
