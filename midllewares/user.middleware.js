@@ -1,7 +1,7 @@
 const { USer } = require('../database')
 const { ApiError } = require('../errors')
-const { CURRENT_YEAR } = require('../constants')
 const { userValidator,userUpdateVAlidators,queryValidators } = require('../validators')
+
 
 const checkIsEmailDublicate = async(req, res, next)=>{
     try{
@@ -84,9 +84,6 @@ const checkIdUserPresent = async(req, res, next)=>{
 const newUserValidator = (req, res, next)=>{
     try{
         const { error, value } = userValidator.newUserJoiSchema.validate(req.body)
-
-        console.log(value)
-
         if(error){
             next( new ApiError(error.details[0].message, 400))
             return
@@ -130,7 +127,40 @@ const validateUserQuery = (req, res, next) =>{
     }
 }
 
+// сильно
+const  getUserDynamycally = (
+    paramName = "_id",
+    where = "body",
+    dataBaseField = paramName
+  ) => {
+    return async (req, res, next) => {
+      try {
+        const findObject = req[where];
+  
+        if (!findObject || typeof findObject !== "object") {
+          next(new ApiError('000'));
+          return;
+        }
+  
+        const param = findObject[paramName];
+
+        const userx = await USer.findOne({[dataBaseField]: param}).select('password')
+  
+        if (!userx) {
+          next(new ApiError('not registered'));
+          return;
+        }
+  
+        req.user = userx;
+        next();
+      } catch (e) {
+        next(e);
+      }
+    };
+  };
+
 module.exports = {
+    getUserDynamycally,
     checkIsEmailDublicate,
     checkUser,
     checkAge,
@@ -138,5 +168,5 @@ module.exports = {
     checkIdUserPresent,
     newUserValidator,
     updateUserValidation,
-    validateUserQuery
+    validateUserQuery,
 }

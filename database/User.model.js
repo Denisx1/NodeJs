@@ -8,7 +8,6 @@ const User = new Schema({
     email: { type: String, trim: true, lowercase: true, unique: true, required: true },
     age:   { type: Number, default: 18 },
     role: { type: String, enum:Object.values(userRolsEnum), default:userRolsEnum.USER},
-    gender: {type: String, trim: true, lowercase: true, enum: Object.values(userGenderEnum), default: userGenderEnum.ANOTHER},
     password:{type:String, required: true, default: null, select: false}
    },
     {timestamps: true}

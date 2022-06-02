@@ -1,3 +1,4 @@
 module.exports = {
-    authService: require('./authService')
+    authService: require('./authService'),
+    emailService: require('./emailService')
 }

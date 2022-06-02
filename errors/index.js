@@ -1,3 +1,3 @@
 module.exports = {
-    AppiError: require('./Appierror')
+    ApiError: require('./Appierror')
 }

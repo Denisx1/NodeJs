@@ -3,5 +3,6 @@ module.exports = {
     userUpdateVAlidators: require('./userUpdateValidators'),
     queryValidators: require('./queryValidator'),
     carUpdateValidator : require('./carUpdateValidator'),
-    carValidator: require('./carValidator')
+    carValidator: require('./carValidator'),
+    authValidator:require('./authValidator')
 }

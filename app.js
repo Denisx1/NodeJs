@@ -1,12 +1,12 @@
 const express = require('express')
 const {engine} = require('express-handlebars')
-const{ PORT, MONGO_URL } = require('./config/config')
+const{ PORT, MONGO_URL, } = require('./config/config')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 
 dotenv.config()
 
-const{ userRouter, carsRouter, reportRouter } = require('./routers')
+const{ userRouter, carsRouter, reportRouter, authRouter } = require('./routers')
 const ApiError = require('./errors/Appierror')
 
 const app = express()
@@ -24,6 +24,7 @@ app.use(express.urlencoded({extended:true}))
 app.use('/users', userRouter)
 app.use('/reports', reportRouter)
 app.use('/cars', carsRouter)
+app.use('/auth', authRouter)
 app.use('*',_notFoundHandler)
 app.use(_mainErrorHendler)
 

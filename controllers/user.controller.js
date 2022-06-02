@@ -27,9 +27,6 @@ module.exports = {
         try{
             const hashPassword = await authService.hashPassword(req.body.password)
 
-            console.log(req.body.password)
-            console.log(hashPassword)
-
             const createdUser = await User.create({...req.body, password: hashPassword})
     
             res.json(createdUser)
