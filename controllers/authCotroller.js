@@ -1,13 +1,20 @@
 const { authService,emailService } = require('../services')
-const  OAuth  = require('../database/OAuthModel');
-const { emailAction } = require('../constants');
+const  { OAuth, actionToken }  = require('../database/');
+const { emailAction, actionTypesEnum } = require('../constants');
+const { FRONTEND_URL } = require('../config/config')
+const { USer } = require('../database');
+
+
+
+
+
 
 module.exports = {
     login: async (req, res, next) => {
       try {
         const {user, body: {password}} = req;
 
-        await emailService.sendMail('automatix33@gmail.com', emailAction.WELCOME) 
+        // await emailService.sendMail('automatix33@gmail.com', emailAction.WELCOME) 
 
         await authService.comparePasswords(user.password, password);
         
@@ -41,7 +48,6 @@ module.exports = {
       }
     },
 
-
     logout: async (req, res, next) => {
       try {
         const authUser = req.authUser
@@ -53,4 +59,68 @@ module.exports = {
         next(e);
       }
     },
+
+    forgotPassword: async (req, res, next) => {
+      try {
+
+        const { user: {_id, name} } = req
+        const token = authService.generateActionToken({userId: user._id})
+        
+        await actionToken.create({
+          token,
+          user_id:_id,
+          actionType: actionTypesEnum.FORGOT_PASSWORD
+        })
+
+        const forgotPasswordUrl = `${FRONTEND_URL}/password/forgot?token = ${token}`
+
+        await emailService.sendMail('automatix332@gmail.com', emailActionEnum.FORGOT_PASSWORD, {
+          forgotPasswordUrl,
+          userName:name
+        })
+
+        res.json('OK')
+
+      } catch (e) {
+        next(e);
+      }
+    },
+   
+    setPasswordAfterForgot: async (req, res, next) =>{
+      try{
+        
+        const { user:{_id}, body } = req
+        const newPassword = await authService.hashPassword(body.password)
+
+        await USer.updateOne({_id:_id}, {
+          password: newPassword
+        })
+
+        await OAuth.deleteMany({
+          user_id: _id
+        })
+
+        await actionToken.deleteOne({
+          token: body.token
+        })
+
+        res.json('ok')
+        next()
+      }catch(e){
+        next(e)
+      }
+    },
+
+    changePassword: async (req, res, next)=>{
+      try{
+        const { user: {_id} } = req
+
+        const newPassword = await authService.hashPassword(body.password)
+
+        await USer.updateOne({
+          user_id: _id,
+          passworg: newPassword
+        })
+      }catch(e){}
+    }
 }    

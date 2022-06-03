@@ -1,8 +1,10 @@
-const { OAuth } = require('../database')
 const { ApiError } = require('../errors')
-
 const { authService } = require('../services')
 const { authValidator } = require('../validators')
+const { actionToken, OAuth } = require('../database')
+const { tokenTypeEnum } = require('../constants')
+
+
 
 
 async function checkAccessToken(req, res, next) {
@@ -35,7 +37,7 @@ async function checkAccessToken(req, res, next) {
 
   function checkRefreshToken(req, res, next) {
     try {
-      const token = req.get("");
+      const token = req.get(" ");
   
       authService.validateToken(token, "refresh");
   
@@ -48,22 +50,25 @@ async function checkAccessToken(req, res, next) {
 function checkActionToken(actionType) {
   return async function (req, res, next) {
     try {
-      const { token } = req.body;
+      const { token } = req.body
+      
+      authService.validateToken(token, actionType)
 
-      authService.validateToken(token, actionType);
-
-      const tokenData = await ActionToken.findOne({
+      const tokenData = await actionToken.findOne({
         token,
-        actionType,
-      }).populate("user_id");
+        actionType
+      })
+      .populate("user_id");
+      
 
       if (!tokenData || !tokenData.user_id) {
         return next(
-          new ApiError(authError.notValidToken, statusCode.notFoundStatus)
+          new ApiError('Token not valod', 401)
         );
       }
 
       req.user = tokenData.user_id;
+
       next();
     } catch (e) {
       next(e);
@@ -80,17 +85,52 @@ function isLoginDataVAlid(req, res, next){
             return
         }
         req.body = value 
-
        
         next()
     }catch(e){
         next(e)
     }
 }
+
+const validPassword = async (req, res, next)=>{
+  try{
+    const { user, body: { password } } = req
+    const { error } = authValidator.changePasswordJoiSchema.validate(req.body)
+
+    if(error){
+      next(new ApiError('111'))
+        return
+    }
+
+    await authService.comparePasswords(user.password, password)
+    
+    next()
+  }catch(e){
+    next(e)
+  }
+}
+
+const validEmail = (req, res, next)=>{
+  try{
+    const { error, value } = authValidator.emailJoiSchema.validate(req.body)
+
+    if (error){
+      next(new ApiError('email is not valid'))
+        return
+    }
+    req.body = value
+
+    next()
+  }catch(e){
+    next(e)
+  }
+}
  
 module.exports = {
     checkAccessToken,
     checkRefreshToken,
     isLoginDataVAlid,
-    checkActionToken
+    checkActionToken,
+    validPassword,
+    validEmail
 }

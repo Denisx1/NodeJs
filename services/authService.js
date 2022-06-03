@@ -1,8 +1,9 @@
 const ApiError = require('../errors/Appierror')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = require('../config/config')
-const{ tokenTypeEnum } = require('../constants')
+const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, ACTION_TOKEN_SECRET } = require('../config/config')
+const{ tokenTypeEnum, actionTypesEnum } = require('../constants')
+
 
 const comparePasswords = async (hashPassword, password) => {
     const isPasswordSame = await bcrypt.compare(password, hashPassword);
@@ -27,16 +28,24 @@ function generateTokenPair(encodeData){
     }
 }    
 
-function validateToken(token, tokenType = tokenTypeEnum.ACCESS){
+function generateActionToken(actionType, encodeData = {}){
+    return jwt.sign(encodeData, 's', {expiresIn:'24h'})
+}
 
+function validateToken(token, tokenType = tokenTypeEnum.ACCESS){
     try{
         let secretWord = ACCESS_TOKEN_SECRET
 
     if (tokenType === tokenTypeEnum.REFRESH){
         secretWord = REFRESH_TOKEN_SECRET
     }
+
+    if(tokenType === actionTypesEnum.FORGOT_PASSWORD){
+        secretWord = ACCESS_TOKEN_SECRET
+    }
     
     return jwt.verify(token, secretWord)
+
     }catch(e){
         throw new ApiError(e.message || 'invalid token', 401)
     }
@@ -46,5 +55,6 @@ module.exports = {
     comparePasswords,
     hashPassword,
     generateTokenPair,
+    generateActionToken,
     validateToken
 }

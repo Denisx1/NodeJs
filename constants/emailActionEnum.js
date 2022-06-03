@@ -1,3 +1,5 @@
 module.exports = {
-    WELCOME: 'welcome'
+    WELCOME: 'welcome',
+    FORGOT_PASSWORD: "forgotPassword",
+    ORDER_COMPLETE: "orderComplete"
 }
