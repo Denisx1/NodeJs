@@ -1,6 +1,7 @@
 const { USer } = require('../database')
 const { ApiError } = require('../errors')
 const { userValidator,userUpdateVAlidators,queryValidators } = require('../validators')
+const { userGlobalConstant } = require('../constants')
 
 
 const checkIsEmailDublicate = async(req, res, next)=>{
@@ -150,7 +151,7 @@ const  getUserDynamycally = (
           next(new ApiError('not registered'));
           return;
         }
-  
+       
         req.user = userx;
         next();
       } catch (e) {
@@ -158,6 +159,31 @@ const  getUserDynamycally = (
       }
     };
   };
+
+const checkUserAvatar = (req, res, next) =>{
+    try{
+        if(!req.files || !req.files.avatar){
+            next(new ApiError('no file', 400))
+            return
+        }
+    
+        const { size, mimetype } = req.files.avatar
+        
+        if(size>userGlobalConstant.IMAGE_MAX_SIZE){
+            next(new ApiError('Max file size should be 5MB', 400))
+            return
+        }
+        
+        if(!userGlobalConstant.IMAGE_MIMETYPES.includes(mimetype)){
+            next(new ApiError('Wrong file type', 400))
+            return
+        }
+        
+        next()
+    }catch(e){
+        next(e)
+    }
+}   
 
 module.exports = {
     getUserDynamycally,
@@ -169,4 +195,5 @@ module.exports = {
     newUserValidator,
     updateUserValidation,
     validateUserQuery,
+    checkUserAvatar
 }

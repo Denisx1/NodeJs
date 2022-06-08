@@ -3,6 +3,7 @@ const { actionTypesEnum } = require('../constants')
 
 const { authcont } = require('../controllers')
 const { authMiddleware, userMiddleware } = require('../midllewares')
+const { forgotPasswordJoiSchema } = require('../validators/authValidator')
 
 const authRouter = Router()
 

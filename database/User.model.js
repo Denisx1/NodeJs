@@ -15,9 +15,9 @@ const User = new Schema({
     toObject: { virtuals: true }
 });
 
-User.virtual('fullName').get(function(){
-    return this.name.toUpperCase()
-})
+// User.virtual('fullName').get(function(){
+//     return this.name.toLowerCase()
+// })
 
 User.statics = {
     async saveuserWithHashPassword(userToSave){

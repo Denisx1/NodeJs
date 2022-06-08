@@ -3,6 +3,7 @@ const {engine} = require('express-handlebars')
 const{ PORT, MONGO_URL, } = require('./config/config')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
+const fileUpload = require('express-fileupload')
 
 dotenv.config()
 
@@ -16,10 +17,16 @@ app.engine('.hbs', engine({defaultLayout: false}))
 app.set('view engine', '.hbs')
 app.set('views', './static')
 
+mongoose.connect(MONGO_URL).then(()=>{
+    console.log('Welcome Database')
+});
+
+
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
+app.use(fileUpload({}))
 
 app.use('/users', userRouter)
 app.use('/reports', reportRouter)
@@ -34,16 +41,11 @@ function _notFoundHandler(req, res, next){
 
 function _mainErrorHendler(err, req, res, next){
     res.status(err.status || 500).json({
-        message: err.message || 'Server Error ',
+        message: err.message || 'Server Error',
         status:err.status,
-        data:[]
+        data:[],
     })
 }
-  
-mongoose.connect(MONGO_URL).then(()=>{
-    console.log('Welcome Database')
-});
-
 
 app.get('/page', (req, res)=>{
    res.render('welcome')

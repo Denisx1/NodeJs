@@ -1,7 +1,7 @@
 const { authService,emailService } = require('../services')
 const  { OAuth, actionToken }  = require('../database/');
 const { emailAction, actionTypesEnum } = require('../constants');
-const { FRONTEND_URL } = require('../config/config')
+const { FRONTEND_URL, SYSTEM_MAIL } = require('../config/config')
 const { USer } = require('../database');
 
 
@@ -12,9 +12,9 @@ const { USer } = require('../database');
 module.exports = {
     login: async (req, res, next) => {
       try {
-        const {user, body: {password}} = req;
+        const {user, body: { password } } = req;
 
-        // await emailService.sendMail('automatix33@gmail.com', emailAction.WELCOME) 
+        // await emailService.sendMail(SYSTEM_MAIL, emailAction.WELCOME) 
 
         await authService.comparePasswords(user.password, password);
         
@@ -74,7 +74,7 @@ module.exports = {
 
         const forgotPasswordUrl = `${FRONTEND_URL}/password/forgot?token = ${token}`
 
-        await emailService.sendMail('automatix332@gmail.com', emailActionEnum.FORGOT_PASSWORD, {
+        await emailService.sendMail(SYSTEM_MAIL, emailActionEnum.FORGOT_PASSWORD, {
           forgotPasswordUrl,
           userName:name
         })

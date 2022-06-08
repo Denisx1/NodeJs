@@ -1,6 +1,6 @@
 const User = require("../database/User.model")
 const ApiError = require('../errors/Appierror')
-const { authService } = require('../services')
+const { authService, s3Service } = require('../services')
 
 
 module.exports = {
@@ -49,7 +49,7 @@ module.exports = {
     }catch(e){
         next(e)
     }
-},
+    },
 
     deleteUser: async (req, res, next)=>{
         try{
@@ -61,7 +61,7 @@ module.exports = {
         }
     },
 
-    updateUser:async(req, res, next)=>{
+    updateUser: async(req, res, next)=>{
         try{
             const {userIndex} = req.params
             const userUpdate = await User.updateOne(
@@ -72,5 +72,19 @@ module.exports = {
         }catch(e){
             next(e)
         }
-    }    
+    },
+    
+    uploadUserPhoto: async (req, res, next) =>{
+        try{
+            
+            const avatar = req.files.avatar
+            const user = req.user
+
+            const stringPromise = await s3Service.uploadFile(avatar, 'user', user._id)
+            
+            res.json(stringPromise)
+        }catch(e){
+            next(e)
+        }
+    }
 }
